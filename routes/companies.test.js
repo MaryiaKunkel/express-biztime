@@ -46,10 +46,8 @@ describe("GET /companies/:code", () => {
     );
     expect(res.statusCode).toBe(200);
 
-    console.log(
-      "insertedInvoices:",
-      insertedInvoices.rows.map((row) => row.id)
-    );
+    const invoicesArr = insertedInvoices.rows.map((row) => row.id);
+    console.log(invoicesArr);
 
     console.log("res.body:", res.body);
 
@@ -57,7 +55,7 @@ describe("GET /companies/:code", () => {
       company: {
         name: "test_name",
         description: "test_description",
-        invoices: insertedInvoices.rows.map((row) => row.id),
+        invoices: invoicesArr,
       },
     });
   });
@@ -68,6 +66,53 @@ describe("GET /companies/:code", () => {
   });
 });
 
-describe("POST /", () => {
-  test("Post a company", async () => {});
+describe("POST /companies", () => {
+  test("Create a single company", async () => {
+    const res = await request(app).post("/companies").send({
+      code: "test_code2",
+      name: "test_name2",
+      description: "test_description2",
+    });
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual([
+      {
+        code: "test_code2",
+        name: "test_name2",
+        description: "test_description2",
+      },
+    ]);
+  });
+});
+
+describe("PUT /companies/:code", () => {
+  test("Update a single company", async () => {
+    const res = await request(app).put(`/companies/${testCompany.code}`).send({
+      code: "test_code",
+      name: "test_name_updated",
+      description: "test_description_updated",
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      code: "test_code",
+      name: "test_name_updated",
+      description: "test_description_updated",
+    });
+  });
+
+  test("Responds with 404 for invalid company", async () => {
+    const res = await request(app).put(`/companies/0`).send({
+      code: "test_code_invalid",
+      name: "test_name_updated",
+      description: "test_description_updated",
+    });
+    expect(res.statusCode).toBe(404);
+  });
+});
+
+describe("DELETE /companies/:code", () => {
+  test("Delete a single company", async () => {
+    const res = await request(app).delete(`/companies/${testCompany.code}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ status: "deleted" });
+  });
 });
