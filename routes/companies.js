@@ -21,14 +21,16 @@ router.get("/:code", async (req, res, next) => {
   const code = req.params.code;
   try {
     const results = await db.query(
-      `SELECT * FROM companies  LEFT JOIN invoices ON companies.code=invoices.comp_Code WHERE code=$1`,
+      `SELECT * FROM companies  LEFT JOIN invoices ON companies.code=invoices.comp_code WHERE code=$1`,
       [code]
     );
     if (results.rows.length === 0) {
       return res.status(404).json({ error: "Company not found" });
     }
     const { companyCode, name, description } = results.rows[0];
-    const invoiceIds = results.rows.map((row) => row.id);
+    const invoiceIds = results.rows
+      .map((row) => row.id)
+      .filter((id) => id !== null);
     const company = {
       companyCode,
       name,
@@ -41,8 +43,6 @@ router.get("/:code", async (req, res, next) => {
     return next(e);
   }
 });
-
-// GET /companies/[code] : Return obj of company: {company: {code, name, description, invoices: [id, ...]}} If the company given cannot be found, this should return a 404 status response.
 
 router.post("/", async (req, res, next) => {
   try {
