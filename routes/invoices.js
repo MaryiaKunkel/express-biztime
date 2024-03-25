@@ -46,15 +46,23 @@ router.post("/", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
   try {
-    const { amt } = req.body;
+    const { amt, paid } = req.body;
     const { id } = req.params;
+    let paid_date;
+
+    if (paid === true) {
+      paid_date = new Date().toISOString().slice(0, 10);
+    } else if (paid === false) {
+      paid_date = null;
+    }
     const results = await db.query(
-      "UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING *",
-      [amt, id]
+      "UPDATE invoices SET amt=$1, paid_date=$2 WHERE id=$3 RETURNING *",
+      [amt, paid_date, id]
     );
     if (results.rows.length === 0) {
       return res.status(404).json({ error: "Invoice not found" });
     }
+
     return res.json(results.rows[0]);
   } catch (e) {
     return next(e);

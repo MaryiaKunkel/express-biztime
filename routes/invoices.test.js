@@ -48,7 +48,6 @@ describe("GET /invoices/:id", () => {
   test("Get a list of 1 invoice", async () => {
     const res = await request(app).get(`/invoices/${testInvoice.id}`);
     expect(res.statusCode).toBe(200);
-    console.log(res.body.invoices.add_date);
     expect(res.body).toEqual({
       invoices: {
         id: testInvoice.id,
@@ -69,14 +68,13 @@ describe("POST /invoices", () => {
       amt: "150.00",
     });
     expect(res.statusCode).toBe(201);
-    console.log(res.body);
     expect(res.body).toEqual([
       {
         id: expect.any(Number),
         comp_code: "test_code",
         amt: 150.0,
         paid: false,
-        add_date: "2024-03-20T05:00:00.000Z",
+        add_date: expect.any(String),
         paid_date: null,
       },
     ]);
@@ -94,7 +92,7 @@ describe("PUT /invoices/:id", () => {
       comp_code: "test_code",
       amt: 200.0,
       paid: false,
-      add_date: "2024-03-20T05:00:00.000Z",
+      add_date: expect.any(String),
       paid_date: null,
     });
   });

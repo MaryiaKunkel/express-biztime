@@ -39,22 +39,41 @@ describe("GET /companies", () => {
 
 describe("GET /companies/:code", () => {
   test("Get a single company", async () => {
-    const res = await request(app).get(`/companies/${testCompany.code}`);
-    console.log("testCompany.code is ", testCompany.code);
-    const insertedInvoices = await db.query(
+    const resPromise = request(app).get(`/companies/${testCompany.code}`);
+
+    const insertedInvoicesPromise = db.query(
       `INSERT INTO invoices (comp_code, amt) VALUES ('${testCompany.code}', 100.00), ('${testCompany.code}', 150.00), ('${testCompany.code}', 200.00) RETURNING *`
     );
+
+    const insertedIndustriesPromise = db.query(
+      `INSERT INTO industries (code, industry) VALUES ('acct', 'Accounting'), ('it', 'IT') RETURNING *`
+    );
+
+    const insertedCompIndPromise = db.query(
+      `INSERT INTO comp_ind (comp_code, ind_code) VALUES ('test_code', 'acct') RETURNING *`
+    );
+
+    const [res, insertedInvoices, insertedIndustries, insertedCompInd] =
+      await Promise.all([
+        resPromise,
+        insertedInvoicesPromise,
+        insertedIndustriesPromise,
+        insertedCompIndPromise,
+      ]);
+
     expect(res.statusCode).toBe(200);
 
     const invoicesArr = insertedInvoices.rows.map((row) => row.id);
-    console.log(invoicesArr);
-
-    console.log("res.body:", res.body);
 
     expect(res.body).toEqual({
       company: {
+        code: "acct",
         name: "test_name",
         description: "test_description",
+        id: expect.any(Number),
+        comp_code: "test_code",
+        ind_code: "acct",
+        industry: "Accounting",
         invoices: invoicesArr,
       },
     });

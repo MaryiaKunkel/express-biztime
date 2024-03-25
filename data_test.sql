@@ -19,3 +19,14 @@ CREATE TABLE invoices (
     paid_date date,
     CONSTRAINT invoices_amt_check CHECK ((amt > (0)::double precision))
 );
+
+CREATE TABLE industries (
+  code text PRIMARY KEY,
+  industry text NOT NULL UNIQUE
+);
+
+CREATE TABLE comp_ind (
+  id serial PRIMARY KEY,
+  comp_code text NOT NULL REFERENCES companies ON DELETE CASCADE,
+  ind_code text NOT NULL REFERENCES industries ON DELETE CASCADE
+);
